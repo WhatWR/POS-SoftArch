@@ -13,7 +13,8 @@ class SaleLineItem extends Model
         'item_id',
         'name',
         'quantity',
-        'price'
+        'price',
+        'total_price'
     ];
 
     public function item()

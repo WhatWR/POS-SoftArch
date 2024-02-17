@@ -23,8 +23,10 @@ class SaleController extends Controller
         // Retrieve the Sale instance from session
         $sale = $request->session()->get('sale', new Sale());
         $saleLineItem = $sale->saleLineItems;
+        
         $sale = [
-            "saleLineItems" => $saleLineItem
+            "saleLineItems" => $saleLineItem,
+            "totalPrice" => $sale->totalPrice
         ];
 
         return view('sales.start', compact('items', 'sale'));
@@ -41,21 +43,37 @@ class SaleController extends Controller
         // Retrieve the item based on the item_id
         $item = Item::findOrFail($request->item_id);
 
-        // Create a new SaleLineItem instance
-        $saleLineItem = new SaleLineItem([
-            'item_id' => $item->id,
-            'name' => $item->getName(),
-            'quantity' => $request->quantity,
-            'price' => $item->price
-        ]);
-
-        // Add the sale line item to the sale
         // retrieve the Sale instance from session
-        $sale = $request->session()->get('sale');
-        $sale->saleLineItems[] = $saleLineItem;
+        $sale = $request->session()->get('sale', new Sale());
 
-        // Calculate total price
-        $totalPrice = $sale->totalPrice + $saleLineItem->getTotalPrice();
+        // Convert the sale line items array to a collection
+        $saleLineItemsCollection = collect($sale->saleLineItems);
+
+        // Check if the sale already contains the item
+        $existingSaleLineItem = $saleLineItemsCollection->first(function ($saleLineItem) use ($item) {
+            return $saleLineItem->item_id == $item->id;
+        });
+
+        if ($existingSaleLineItem) {
+        // If the item already exists, update its quantity
+        $existingSaleLineItem->quantity += $request->quantity;
+        } else {
+            // Otherwise, create a new SaleLineItem instance
+            $saleLineItem = new SaleLineItem([
+                'item_id' => $item->id,
+                'name' => $item->getName(),
+                'quantity' => $request->quantity,
+                'price' => $item->price,
+            ]);
+
+            // Add the new sale line item to the sale
+            $sale->saleLineItems[] = $saleLineItem;
+        }
+
+        $totalPrice = 0;
+        foreach ($sale->saleLineItems as $saleLineItem) {
+            $totalPrice += $saleLineItem->getTotalPrice();
+        }
         $sale->totalPrice = $totalPrice;
 
         // Store the updated sale instance back into session

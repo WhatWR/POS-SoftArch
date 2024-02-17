@@ -54,7 +54,7 @@
                     <td>{{ $saleLineItem['item_id'] }}</td>
                     <td>{{ $saleLineItem['name'] }}</td>
                     <td>{{ $saleLineItem['quantity'] }}</td>
-                    <td>${{ $saleLineItem['price'] }}</td>
+                    <td>${{ $saleLineItem->getTotalPrice() }}</td>
                     <td>
                         <form action="{{ route('sales.updateItem', $saleLineItem['item_id']) }}" method="post">
                             @csrf
@@ -72,7 +72,7 @@
                 @endforeach
             </tbody>
         </table>
-        {{-- <p>Total Price: ${{ $sale['totalPrice'] }}</p> --}}
+        <p>Total Price: ${{ $sale['totalPrice'] }}</p>
     @else
         <p>No sale line items added yet.</p>
     @endif
