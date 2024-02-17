@@ -53,7 +53,7 @@
                 <tr>
                     <td>{{ $saleLineItem['item_id'] }}</td>
                     <td>{{ $saleLineItem['name'] }}</td>
-                    <td>{{ $saleLineItem['quantity'] }}</td>
+                    <td>{{ $saleLineItem['quantity'] }} X ${{ $saleLineItem['price'] }}</td>
                     <td>${{ $saleLineItem->getTotalPrice() }}</td>
                     <td>
                         <form action="{{ route('sales.updateItem', $saleLineItem['item_id']) }}" method="post">

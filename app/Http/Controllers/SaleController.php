@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\Sale;
 use App\Models\SaleLineItem;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
 class SaleController extends Controller
@@ -23,7 +22,7 @@ class SaleController extends Controller
         // Retrieve the Sale instance from session
         $sale = $request->session()->get('sale', new Sale());
         $saleLineItem = $sale->saleLineItems;
-        
+
         $sale = [
             "saleLineItems" => $saleLineItem,
             "totalPrice" => $sale->totalPrice
@@ -53,6 +52,12 @@ class SaleController extends Controller
         $existingSaleLineItem = $saleLineItemsCollection->first(function ($saleLineItem) use ($item) {
             return $saleLineItem->item_id == $item->id;
         });
+
+        $totalQuantity = $request->quantity + ($existingSaleLineItem ? $existingSaleLineItem->quantity : 0);
+
+        if ($totalQuantity > $item->amount) {
+            return redirect()->back()->withErrors(['quantity' => 'The requested quantity exceeds the available amount.']);
+        }
 
         if ($existingSaleLineItem) {
         // If the item already exists, update its quantity
@@ -108,15 +113,37 @@ class SaleController extends Controller
 
     public function updateSaleLineItem(Request $request, $itemId)
     {
-        // Retrieve the Sale instance from session
-        // You need to retrieve the Sale instance from session
-        $sale = $request->session()->get('sale');
-
-        // Validate request data
         $request->validate([
             'quantity' => 'required|numeric|min:1'
         ]);
 
+        $item = Item::findOrFail($itemId);
+
+        $sale = $request->session()->get('sale', new Sale());
+
+        // Convert the sale line items array to a collection
+        $saleLineItemsCollection = collect($sale->saleLineItems);
+
+        // Check if the sale already contains the item
+        $existingSaleLineItem = $saleLineItemsCollection->first(function ($saleLineItem) use ($item) {
+            return $saleLineItem->item_id == $item->id;
+        });
+
+        $totalQuantity = 0;
+        if($request->quantity - $existingSaleLineItem->quantity < 0) {
+            $totalQuantity = $request->quantity;
+        }
+        elseif($request->quantity - $existingSaleLineItem->quantity > 0){
+            $totalQuantity = $request->quantity;
+        }
+        else {
+            $totalQuantity = $request->quantity;
+        }
+
+        if ($totalQuantity > $item->amount) {
+            return redirect()->back()->withErrors(['quantity' => 'The requested quantity exceeds the available amount.']);
+        }
+        
         // Find the sale line item by item id and update its quantity
         foreach ($sale->saleLineItems as $saleLineItem) {
             if ($saleLineItem->item_id == $itemId) {
