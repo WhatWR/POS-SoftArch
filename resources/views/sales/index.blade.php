@@ -14,5 +14,6 @@
     <div class="container">
         <a href="{{ route('sales.start') }}" class="btn btn-primary">Open Sale</a>
     </div>
+    <h2>Membership get 10% discount</h2>
 </div>
 @endsection

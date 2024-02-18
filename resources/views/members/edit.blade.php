@@ -1,6 +1,6 @@
 <!-- resources/views/members/edit.blade.php -->
 
-@extends('layouts.app')
+@extends('auth.layouts')
 
 @section('content')
     <div class="container">

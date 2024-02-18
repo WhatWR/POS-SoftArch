@@ -7,17 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
-    protected $fillable = ['totalPrice']; // Define any other fillable fields if necessary
+    protected $fillable = ['totalPrice,member_id']; // Define any other fillable fields if necessary
 
     public function saleLineItems()
     {
         return $this->hasMany(SaleLineItem::class);
     }
 
+    public function member ()
+    {
+        return $this->belongsTo(Member::class);
+    }
+
     public function getTotalPrice()
     {
-        return $this->saleLineItems->sum(function ($saleLineItem) {
+        $totalPrice = $this->saleLineItems->sum(function ($saleLineItem) {
             return $saleLineItem->getTotalPrice();
         });
+
+        if ($this->member) {
+            $totalPrice *= 0.9;
+        }
+
+        return $totalPrice;
     }
 }

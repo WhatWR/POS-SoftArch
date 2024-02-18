@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
             $table->decimal('totalPrice', 10, 2)->default(0);
+            $table->unsignedBigInteger('member_id')->nullable()->default(0); // Nullable member_id with default value of 0
             $table->timestamps();
+
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('set null');
         });
     }
 

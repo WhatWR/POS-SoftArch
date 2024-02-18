@@ -1,6 +1,6 @@
 <!-- resources/views/sales/start.blade.php -->
 
-@extends('layouts.app')
+@extends('auth.layouts')
 
 @section('content') 
     <h1>Add Sale Line Item</h1>
@@ -72,6 +72,34 @@
                 @endforeach
             </tbody>
         </table>
+
+        
+
+        @if ($sale->member)
+        <div>
+            <p>Current Member: {{ $sale->member->name }} (tel: {{ $sale->member->tel }})</p>
+            <form action="{{ route('sales.removeMember') }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-sm btn-danger">Remove Member</button>
+            </form>
+        </div>
+        @else
+            <form action="{{ route('sales.store_member') }}" method="POST">
+                @csrf
+                <h3>Add Member to Sale</h3>
+                <div class="form-group">
+                    <label for="tel">Telephone Number:</label>
+                    <input type="tel" id="tel" name="tel" class="form-control" placeholder="Enter Telephone Number">
+                    @error('tel')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">Add Member to Sale</button>
+            </form>
+        @endif 
+        
+
         <p>Total Price: ${{ $sale['totalPrice'] }}</p>
         <form action="{{ route('sales.pay') }}" method="POST">
             @csrf

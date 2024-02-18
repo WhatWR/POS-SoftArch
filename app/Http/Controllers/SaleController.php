@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Member;
 use App\Models\Payment;
 use App\Models\Sale;
 use App\Models\SaleLineItem;
@@ -10,12 +11,6 @@ use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
-    public function index()
-    {
-        $items = Item::all();
-
-        return view('sales.index');
-    }
     public function start(Request $request)
     {
         $items = Item::all();
@@ -93,25 +88,16 @@ class SaleController extends Controller
 
         $sale = $request->session()->get('sale', new Sale());
 
-        $saleLineItemsCollection = collect($sale->saleLineItems);
-
-        $existingSaleLineItem = $saleLineItemsCollection->first(function ($saleLineItem) use ($item) {
+        $existingSaleLineItem = $sale->saleLineItems->first(function ($saleLineItem) use ($item) {
             return $saleLineItem->item_id == $item->id;
         });
 
-        $totalQuantity = 0;
-        if($request->quantity - $existingSaleLineItem->quantity < 0) {
-            $totalQuantity = $request->quantity;
-        }
-        elseif($request->quantity - $existingSaleLineItem->quantity > 0){
-            $totalQuantity = $request->quantity;
-        }
-        else {
-            $totalQuantity = $request->quantity;
-        }
+        $totalQuantity = $request->quantity - $existingSaleLineItem->quantity;
 
-        if ($totalQuantity > $item->amount) {
-            return redirect()->back()->withErrors(['quantity' => 'The requested quantity exceeds the available amount.']);
+        if ($totalQuantity > 0) {
+            if ($request->quantity > $item->amount) {
+                return redirect()->back()->withErrors(['quantity' => 'The requested quantity exceeds the available amount.']);
+            }
         }
         
         foreach ($sale->saleLineItems as $saleLineItem) {
@@ -138,6 +124,7 @@ class SaleController extends Controller
 
         $newSale = new Sale();
         $newSale->totalPrice = $sale->totalPrice;
+        $newSale->member_id = $sale->member ? $sale->member->id : null;
         $newSale->save();
 
         foreach ($sale->saleLineItems as $saleLineItem) {
@@ -159,6 +146,31 @@ class SaleController extends Controller
         }
 
         $request->session()->forget('sale');
-        return redirect()->route('sales.index')->with('success', 'Payment successful.');
+        return redirect()->route('dashboard')->with('success', 'Payment successful.');
+    }
+
+    public function addMemberToSale(Request $request)
+    {
+        $request->validate([
+            'tel' => 'required|numeric' // Adjust validation rules for telephone number
+        ]);
+    
+        // Find member based on telephone number
+        $member = Member::where('tel', $request->tel)->firstOrFail();
+
+        $sale = $request->session()->get('sale', new Sale());
+        $sale->member = $member; 
+        $sale->totalPrice = $sale->getTotalPrice(); 
+        $request->session()->put('sale', $sale);
+        return redirect()->route('sales.start')->with('success', 'Member added to sale session successfully.');
+    }
+
+    public function removeMember(Request $request)
+    {
+        $sale = $request->session()->get('sale', new Sale());
+        $sale->member = null;
+        $sale->totalPrice = $sale->getTotalPrice(); 
+        $request->session()->put('sale', $sale);
+        return redirect()->route('sales.start')->with('success', 'Member removed from sale successfully.');
     }
 }
