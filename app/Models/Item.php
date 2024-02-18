@@ -23,4 +23,9 @@ class Item extends Model
     {
         return $this->price;
     }
+
+    public function getAmount()
+    {
+        return $this->amount;
+    }
 }

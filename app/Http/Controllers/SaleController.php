@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
-    public function start(Request $request)
+    public function openNewSale(Request $request)
     {
         $items = Item::all();
     
@@ -165,7 +165,7 @@ class SaleController extends Controller
         return redirect()->route('sales.start')->with('success', 'Member added to sale session successfully.');
     }
 
-    public function removeMember(Request $request)
+    public function removeMemberToSale(Request $request)
     {
         $sale = $request->session()->get('sale', new Sale());
         $sale->member = null;

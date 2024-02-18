@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\MemberController;
-use App\Http\Controllers\Auth\LoginRegisterController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +20,7 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::controller(LoginRegisterController::class)->group(function() {
+Route::controller(AuthController::class)->group(function() {
     Route::get('/register', 'register')->name('register');
     Route::post('/store', 'store')->name('store');
     Route::get('/login', 'login')->name('login');
@@ -31,14 +31,13 @@ Route::controller(LoginRegisterController::class)->group(function() {
 
 Route::middleware('auth')->group(function () {
     // Define your authenticated routes here
-    Route::get('/sales/start', [SaleController::class, 'start'])->name('sales.start');
-    Route::post('/sales/addItem', [SaleController::class, 'addSaleLineItem'])->name('sales.addItem');
+    Route::get('/sales/start', [SaleController::class, 'openNewSale'])->name('sales.start');
+    Route::post('/sales/addSaleLineItem', [SaleController::class, 'addSaleLineItem'])->name('sales.addItem');
     Route::put('/sales/updateItem/{itemId}', [SaleController::class, 'updateSaleLineItem'])->name('sales.updateItem');
-    Route::delete('/sales/removeItem/{itemId}', [SaleController::class, 'removeSaleLineItem'])->name('sales.removeItem');
+    Route::delete('/sales/removeSaleLineItem/{itemId}', [SaleController::class, 'removeSaleLineItem'])->name('sales.removeItem');
     Route::post('/sales/pay', [SaleController::class, 'pay'])->name('sales.pay');
-    Route::post('/sales/add-member', [SaleController::class, 'addMemberToSale'])->name('sales.store_member');
-    Route::delete('/sales/remove-member', [SaleController::class, 'removeMember'])->name('sales.removeMember');
-    Route::put('/sales/update-member', [SaleController::class, 'updateMember'])->name('sales.updateMember');
+    Route::post('/sales/addMember', [SaleController::class, 'addMemberToSale'])->name('sales.store_member');
+    Route::delete('/sales/removeMember', [SaleController::class, 'removeMemberToSale'])->name('sales.removeMember');
     // Verb          Path                        Action  Route Name
     // GET           /items                      index   items.index
     // GET           /items/create               create  items.create

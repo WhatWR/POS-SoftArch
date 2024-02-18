@@ -48,6 +48,17 @@ class ItemController extends Controller
 
     public function update(Request $request, Item $item)
     {
+        $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('items') // Ensures name is unique in the "items" table
+            ],
+            'price' => 'required|numeric',
+            'amount' => 'required|integer'
+        ]);
+        
         $item->update($request->all());
         return redirect()->route('items.index')->with('success', 'Item updated successfully.');
     }
