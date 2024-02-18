@@ -52,8 +52,8 @@
                 @foreach($sale['saleLineItems'] as $saleLineItem)
                 <tr>
                     <td>{{ $saleLineItem['item_id'] }}</td>
-                    <td>{{ $saleLineItem['name'] }}</td>
-                    <td>{{ $saleLineItem['quantity'] }} X ${{ $saleLineItem['price'] }}</td>
+                    <td>{{ $saleLineItem->item->getName() }}</td>
+                    <td>{{ $saleLineItem['quantity'] }} X ${{ $saleLineItem->item->getPrice() }}</td>
                     <td>${{ $saleLineItem->getTotalPrice() }}</td>
                     <td>
                         <form action="{{ route('sales.updateItem', $saleLineItem['item_id']) }}" method="post">
@@ -73,6 +73,10 @@
             </tbody>
         </table>
         <p>Total Price: ${{ $sale['totalPrice'] }}</p>
+        <form action="{{ route('sales.pay') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-success">Pay Now</button>
+        </form>
     @else
         <p>No sale line items added yet.</p>
     @endif

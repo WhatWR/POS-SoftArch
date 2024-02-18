@@ -11,11 +11,13 @@ class SaleLineItem extends Model
 
     protected $fillable = [
         'item_id',
-        'name',
         'quantity',
-        'price',
-        'total_price'
     ];
+
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
 
     public function item()
     {
@@ -24,6 +26,9 @@ class SaleLineItem extends Model
 
     public function getTotalPrice()
     {
+        if (!$this->relationLoaded('item')) {
+            $this->load('item');
+        }
         return $this->item->price * $this->quantity;
     }
 }

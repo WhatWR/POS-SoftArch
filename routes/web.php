@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // })->name('sales.start');
 
-Route::get('/sales', [SaleController::class, 'index']);
+Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
 Route::get('/sales/start', [SaleController::class, 'start'])->name('sales.start');
 Route::post('/sales/addItem', [SaleController::class, 'addSaleLineItem'])->name('sales.addItem');
 Route::put('/sales/updateItem/{itemId}', [SaleController::class, 'updateSaleLineItem'])->name('sales.updateItem');
