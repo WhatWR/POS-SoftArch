@@ -15,6 +15,7 @@ class SaleController extends Controller
     {
         $items = Item::all();
     
+        // $request->session()->forget('sale');
         $sale = $request->session()->get('sale', new Sale());
 
         return view('sales.start', compact('items', 'sale'));
@@ -31,11 +32,14 @@ class SaleController extends Controller
 
         $sale = $request->session()->get('sale', new Sale());
 
+        if (!$sale) {
+            return redirect()->back()->with('error', 'No valid sale found.');
+        }
+
         if (!isset($sale->saleLineItems)) {
             $sale->saleLineItems = collect();
         }
 
-        // Check if the sale already contains the item
         $existingSaleLineItem = $sale->saleLineItems->first(function ($saleLineItem) use ($item) {
             return $saleLineItem->item_id == $item->id;
         });
@@ -67,6 +71,10 @@ class SaleController extends Controller
     {
         $sale = $request->session()->get('sale');
 
+        if (!$sale) {
+            return redirect()->back()->with('error', 'No valid sale found.');
+        }
+
         $sale->saleLineItems = $sale->saleLineItems->reject(function ($saleLineItem) use ($itemId) {
             return $saleLineItem->item_id == $itemId;
         });
@@ -87,6 +95,9 @@ class SaleController extends Controller
         $item = Item::findOrFail($itemId);
 
         $sale = $request->session()->get('sale', new Sale());
+        if (!$sale) {
+            return redirect()->back()->with('error', 'No valid sale found.');
+        }
 
         $existingSaleLineItem = $sale->saleLineItems->first(function ($saleLineItem) use ($item) {
             return $saleLineItem->item_id == $item->id;
@@ -122,15 +133,29 @@ class SaleController extends Controller
             return redirect()->back()->with('error', 'No valid sale found.');
         }
 
-        $newSale = new Sale();
+        $newSale = new Sale([
+            // 'totalPrice' => $sale->totalPrice,
+            // 'member_id' => $sale->member ? $sale->member->id : 0
+        ]);
+
         $newSale->totalPrice = $sale->totalPrice;
         $newSale->member_id = $sale->member ? $sale->member->id : null;
         $newSale->save();
 
-        foreach ($sale->saleLineItems as $saleLineItem) {
-            $saleLineItem->sale_id = $newSale->id;
-            $saleLineItem->save();
+        function saveToSaleLineItemAndItemToDB($sale, $newSaleId)
+        {
+            foreach ($sale->saleLineItems as $saleLineItem) {
+                $saleLineItem->sale_id = $newSaleId;
+                $saleLineItem->save();
+    
+                // Update item amount
+                $item = Item::findOrFail($saleLineItem->item_id);
+                $item->amount -= $saleLineItem->quantity;
+                $item->save();
+            }
         }
+
+        saveToSaleLineItemAndItemToDB($sale, $newSale->id);
 
         $payment = new Payment([
             'sale_id' => $newSale->id,
@@ -139,12 +164,7 @@ class SaleController extends Controller
 
         $payment->save();
 
-        foreach ($sale->saleLineItems as $saleLineItem) {
-            $item = Item::findOrFail($saleLineItem->item_id);
-            $item->amount -= $saleLineItem->quantity;
-            $item->save();
-        }
-
+        // remove sale from session
         $request->session()->forget('sale');
         return redirect()->route('dashboard')->with('success', 'Payment successful.');
     }
@@ -173,4 +193,17 @@ class SaleController extends Controller
         $request->session()->put('sale', $sale);
         return redirect()->route('sales.start')->with('success', 'Member removed from sale successfully.');
     }
+
+    // public function saveToSaleLineItemAndItemToDB(Sale $sale, int $new_sale_id)
+    // {
+    //     foreach ($sale->saleLineItems as $saleLineItem) {
+    //         $saleLineItem->sale_id = $new_sale_id;
+    //         $saleLineItem->save();
+
+    //         // Update item amount
+    //         $item = Item::findOrFail($saleLineItem->item_id);
+    //         $item->amount -= $saleLineItem->quantity;
+    //         $item->save();
+    //     }
+    // }
 }

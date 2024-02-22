@@ -53,7 +53,6 @@ class ItemController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('items') // Ensures name is unique in the "items" table
             ],
             'price' => 'required|numeric',
             'amount' => 'required|integer'

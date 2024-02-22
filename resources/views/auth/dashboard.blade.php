@@ -2,31 +2,32 @@
 
 @section('content')
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-8">
-        <h1 class="mb-4">Sales Management</h1>
-        <h3>Membership get 10% discount</h3>
-        <div class="card">
-            <div class="card-header">Dashboard</div>
-            <div class="card-body">
-                @if ($message = Session::get('success'))
-                    <div class="alert alert-success">
-                        {{ $message }}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0">Sales Management</h1>
+                </div>
+                <div class="card-body">
+                    <h3>Membership Discount: 10%</h3>
+                    <hr>
+                    @if ($message = Session::get('success'))
+                        <div class="alert alert-success" role="alert">
+                            {{ $message }}
+                        </div>
+                    @else
+                        <div class="alert alert-info" role="alert">
+                            You are logged in!
+                        </div>
+                    @endif
+                    <div class="mt-3">
+                        <a href="{{ route('sales.start') }}" class="btn btn-success">Open Sale</a>
                     </div>
-                    <div class="container">
-                        <a href="{{ route('sales.start') }}" class="btn btn-primary">Open Sale</a>
-                    </div>      
-                @else
-                    <div class="alert alert-success">
-                        You are logged in!
-                    </div> 
-                    <div class="container">
-                        <a href="{{ route('sales.start') }}" class="btn btn-primary">Open Sale</a>
-                    </div>      
-                @endif                
+                </div>
             </div>
         </div>
-    </div>    
+    </div>
 </div>
-    
+
 @endsection

@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
     // Define your authenticated routes here
     Route::get('/sales/start', [SaleController::class, 'openNewSale'])->name('sales.start');
     Route::post('/sales/addSaleLineItem', [SaleController::class, 'addSaleLineItem'])->name('sales.addItem');
-    Route::put('/sales/updateItem/{itemId}', [SaleController::class, 'updateSaleLineItem'])->name('sales.updateItem');
+    Route::put('/sales/updateSaleLineItem/{itemId}', [SaleController::class, 'updateSaleLineItem'])->name('sales.updateItem');
     Route::delete('/sales/removeSaleLineItem/{itemId}', [SaleController::class, 'removeSaleLineItem'])->name('sales.removeItem');
     Route::post('/sales/pay', [SaleController::class, 'pay'])->name('sales.pay');
     Route::post('/sales/addMember', [SaleController::class, 'addMemberToSale'])->name('sales.store_member');

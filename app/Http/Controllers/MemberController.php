@@ -27,7 +27,7 @@ class MemberController extends Controller
 
         Member::create($request->all());
 
-        return redirect()->route('members.index')->with('success', 'Member added successfully.');
+        return redirect()->route('members.index')->with('success', 'Member created successfully.');
     }
 
     public function edit(Member $member)
